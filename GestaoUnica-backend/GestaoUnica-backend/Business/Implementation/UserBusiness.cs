@@ -1,7 +1,8 @@
 ﻿using GestaoUnica_backend.Business.Interfaces;
 using GestaoUnica_backend.Data.Repository.Interfaces;
-using GestaoUnica_backend.Models;
 using GestaoUnica_backend.Repository.Generic;
+using GestaoUnica_backend.Services.Interfaces;
+using GestaoUnica_backend.Services.Models;
 using System.Collections.Generic;
 
 namespace GestaoUnica_backend.Business.Implementation
@@ -10,11 +11,18 @@ namespace GestaoUnica_backend.Business.Implementation
     {
         private readonly IRepository<User> _repository;
         private readonly IUserRepository _userRepository;
+        private readonly ITokenService _tokenService;
 
-        public UserBusiness(IRepository<User> repository, IUserRepository userRepository)
+        public UserBusiness(IRepository<User> repository, IUserRepository userRepository, ITokenService tokenService)
         {
             _repository = repository;
             _userRepository = userRepository;
+            _tokenService = tokenService;
+        }
+
+        public bool ChangePassword(int id, string password)
+        {
+            return _userRepository.ChangePassword(id, password);
         }
 
         public User Create(User user)
@@ -40,6 +48,16 @@ namespace GestaoUnica_backend.Business.Implementation
         public User FindByID(int id)
         {
             return _repository.FindByID(id);
+        }
+
+        public User FindByToken(string token)
+        {
+             var userClaims = _tokenService.DecodeToken(token);
+           
+            if (userClaims != null)
+                return FindByUsername(userClaims.Username);
+            else
+                return new User() { Id = -1 };
         }
 
         public User FindByUsername(string username)

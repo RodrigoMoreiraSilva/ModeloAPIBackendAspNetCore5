@@ -1,4 +1,4 @@
-﻿using GestaoUnica_backend.Models;
+﻿using GestaoUnica_backend.Services.Models;
 using System.Collections.Generic;
 
 namespace GestaoUnica_backend.Business.Interfaces
@@ -11,5 +11,6 @@ namespace GestaoUnica_backend.Business.Interfaces
         Role Update(Role role);
         void Delete(int id);
         bool Exists(int id);
+        Role FindByRoleName(string roleName);
     }
 }

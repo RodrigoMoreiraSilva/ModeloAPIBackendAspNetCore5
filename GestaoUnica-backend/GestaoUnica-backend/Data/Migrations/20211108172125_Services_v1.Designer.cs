@@ -4,14 +4,16 @@ using GestaoUnica_backend.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace GestaoUnica_backend.Migrations
 {
     [DbContext(typeof(SQLContext))]
-    partial class SQLContextModelSnapshot : ModelSnapshot
+    [Migration("20211108172125_Services_v1")]
+    partial class Services_v1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -143,6 +145,57 @@ namespace GestaoUnica_backend.Migrations
                     b.ToTable("GrupoEmpresa");
                 });
 
+            modelBuilder.Entity("GestaoUnica_backend.Models.Log", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("AcaoRealizada")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("AcaoRealizada");
+
+                    b.Property<DateTime>("DataAlteracao")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("DataAlteracao");
+
+                    b.Property<DateTime>("DataInclusao")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("DataInclusao");
+
+                    b.Property<int>("IdUserAlteracao")
+                        .HasColumnType("int")
+                        .HasColumnName("IdUserAlteracao");
+
+                    b.Property<int>("IdUserInclusao")
+                        .HasColumnType("int")
+                        .HasColumnName("IdUserInclusao");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit")
+                        .HasColumnName("IsActive");
+
+                    b.Property<string>("Observacao")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("Observacao");
+
+                    b.Property<int?>("RegrasId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Url")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Url");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RegrasId");
+
+                    b.ToTable("Logs");
+                });
+
             modelBuilder.Entity("GestaoUnica_backend.Models.Pessoa", b =>
                 {
                     b.Property<int>("Id")
@@ -198,57 +251,6 @@ namespace GestaoUnica_backend.Migrations
                     b.HasIndex("UsuarioId");
 
                     b.ToTable("Pessoas");
-                });
-
-            modelBuilder.Entity("GestaoUnica_backend.Services.Models.Log", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("AcaoRealizada")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("AcaoRealizada");
-
-                    b.Property<DateTime>("DataAlteracao")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("DataAlteracao");
-
-                    b.Property<DateTime>("DataInclusao")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("DataInclusao");
-
-                    b.Property<int>("IdUserAlteracao")
-                        .HasColumnType("int")
-                        .HasColumnName("IdUserAlteracao");
-
-                    b.Property<int>("IdUserInclusao")
-                        .HasColumnType("int")
-                        .HasColumnName("IdUserInclusao");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit")
-                        .HasColumnName("IsActive");
-
-                    b.Property<string>("Observacao")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
-                        .HasColumnName("Observacao");
-
-                    b.Property<int?>("RegraId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Url")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("Url");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RegraId");
-
-                    b.ToTable("Logs");
                 });
 
             modelBuilder.Entity("GestaoUnica_backend.Services.Models.Role", b =>
@@ -364,6 +366,15 @@ namespace GestaoUnica_backend.Migrations
                     b.Navigation("GrupoEmpresa");
                 });
 
+            modelBuilder.Entity("GestaoUnica_backend.Models.Log", b =>
+                {
+                    b.HasOne("GestaoUnica_backend.Services.Models.Role", "Regras")
+                        .WithMany()
+                        .HasForeignKey("RegrasId");
+
+                    b.Navigation("Regras");
+                });
+
             modelBuilder.Entity("GestaoUnica_backend.Models.Pessoa", b =>
                 {
                     b.HasOne("GestaoUnica_backend.Services.Models.User", "Usuario")
@@ -371,15 +382,6 @@ namespace GestaoUnica_backend.Migrations
                         .HasForeignKey("UsuarioId");
 
                     b.Navigation("Usuario");
-                });
-
-            modelBuilder.Entity("GestaoUnica_backend.Services.Models.Log", b =>
-                {
-                    b.HasOne("GestaoUnica_backend.Services.Models.Role", "Regra")
-                        .WithMany()
-                        .HasForeignKey("RegraId");
-
-                    b.Navigation("Regra");
                 });
 #pragma warning restore 612, 618
         }

@@ -3,9 +3,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using GestaoUnica_backend.Context;
-using GestaoUnica_backend.Models;
 using GestaoUnica_backend.Business.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using GestaoUnica_backend.Services.Models;
 
 namespace GestaoUnica_backend.Controllers
 {

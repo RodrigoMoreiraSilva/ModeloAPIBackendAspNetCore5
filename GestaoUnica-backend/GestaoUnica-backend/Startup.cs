@@ -3,9 +3,10 @@ using GestaoUnica_backend.Business.Interfaces;
 using GestaoUnica_backend.Context;
 using GestaoUnica_backend.Data.Repository.Implementations;
 using GestaoUnica_backend.Data.Repository.Interfaces;
-using GestaoUnica_backend.Interfaces;
 using GestaoUnica_backend.Repository.Generic;
-using GestaoUnica_backend.Services;
+using GestaoUnica_backend.Services.Implementation;
+using GestaoUnica_backend.Services.Interfaces;
+using GestaoUnica_backend.Services.Sealeds;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -31,7 +32,15 @@ namespace GestaoUnica_backend
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddCors();
+            services.AddCors(x =>
+            {
+                x.AddPolicy(name: "AllowOrigin",
+                    builder =>
+                    {
+                        builder.WithOrigins("http://localhost:4200")
+                               .AllowAnyHeader();
+                    });
+            });
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
@@ -40,6 +49,7 @@ namespace GestaoUnica_backend
             #region ConnectionString
             services.AddDbContext<SQLContext>(x => x.UseSqlServer(Configuration.GetConnectionString("Connection")));
             #endregion
+
             #region Token e Active Directory
             var key = Encoding.ASCII.GetBytes(Configuration.GetSection("TokenConfig:Secret").Value.ToString());
             
@@ -64,13 +74,21 @@ namespace GestaoUnica_backend
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IActiveDirectoryService, ActiveDirectoryService>();
             #endregion
+            
             #region Repositorios
             services.AddScoped(typeof(IRepository<>), typeof(GenericRepository<>));
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IRoleRepository, RoleRepository>();
             #endregion
+
             #region Business - Regras de negócio
             services.AddScoped<IUserBusiness, UserBusiness>();
             services.AddScoped<IRoleBusiness, RoleBusiness>();
+            #endregion
+
+            #region Services
+            services.AddScoped<ILogService, LogService>();
+            services.AddScoped<IPasswordHasher, PasswordHasher>();
             #endregion
         }
 
@@ -88,7 +106,7 @@ namespace GestaoUnica_backend
 
             app.UseRouting();
 
-            //app.UseCors(); //Deve ficar apos UseHttpsRedirection e UseRouting e antes de UseEndpoints
+            app.UseCors("AllowOrigin"); //Deve ficar apos UseHttpsRedirection e UseRouting e antes de UseEndpoints
 
             app.UseAuthentication();
             app.UseAuthorization();

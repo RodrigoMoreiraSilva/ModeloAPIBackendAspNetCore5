@@ -2,9 +2,10 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using GestaoUnica_backend.Models;
 using GestaoUnica_backend.Business.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using GestaoUnica_backend.Services.Models;
+using GestaoUnica_backend.Services.Interfaces;
 
 namespace GestaoUnica_backend.Controllers
 {
@@ -13,14 +14,16 @@ namespace GestaoUnica_backend.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserBusiness _userBusiness;
+        private readonly IPasswordHasher _passwordHasher;
 
-        public UsersController(IUserBusiness userBusiness)
+        public UsersController(IUserBusiness userBusiness, IPasswordHasher passwordHasher)
         {
             _userBusiness = userBusiness;
+            _passwordHasher = passwordHasher;
         }
 
         // GET: api/Users
-        [Authorize(Roles ="Administrador")]
+        [Authorize(Roles = "Administrador")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> FindAll()
         {
@@ -46,7 +49,7 @@ namespace GestaoUnica_backend.Controllers
         // POST: api/Users/FindByUserName
         [Authorize(Roles = "Administrador,Funcionario,Cliente")]
         [HttpPost]
-        public async Task<ActionResult<User>> FindByUsername([FromBody]User user)
+        public async Task<ActionResult<User>> FindByUsername([FromBody] User user)
         {
             var foundUser = _userBusiness.FindByUsername(user.Username);
 
@@ -60,7 +63,7 @@ namespace GestaoUnica_backend.Controllers
 
         // PUT: api/Users/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [Authorize(Roles ="Administrador")]
+        [Authorize(Roles = "Administrador")]
         [HttpPut("{id}")]
         public async Task<ActionResult<User>> AlterUser(int id, [FromBody] User user)
         {
@@ -68,10 +71,11 @@ namespace GestaoUnica_backend.Controllers
             {
                 return BadRequest();
             }
-
             try
             {
-                user.Password = "xxxx";
+                if (!string.IsNullOrEmpty(user.Password))
+                    user.Password = _passwordHasher.Hash(user.Password);
+
                 return _userBusiness.Update(user);
             }
             catch (DbUpdateConcurrencyException)
@@ -87,18 +91,38 @@ namespace GestaoUnica_backend.Controllers
             }
         }
 
+        [Authorize]
+        [HttpPatch("{id}")]
+        public async Task<ActionResult> ChangePassword(int id, [FromBody] User user)
+        {
+            var hash = _passwordHasher.Hash(user.Password);
+
+            try
+            {
+                _userBusiness.ChangePassword(id, hash);
+
+                return Ok(new { message = "Senha alterada com sucesso"});
+            }
+            catch
+            {
+                return BadRequest(new { message = "Ocorreu um erro ao tentar alterar a senha" });
+            }
+        }
+
         // POST: api/Users
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [Authorize(Roles ="Administrador")]
+        [Authorize(Roles = "Administrador")]
         [HttpPost]
         public async Task<ActionResult<User>> CreateUser(User user)
         {
-            user.Password = "xxxx";
+            if (!string.IsNullOrEmpty(user.Password))
+                user.Password = _passwordHasher.Hash(user.Password);
+
             return _userBusiness.Create(user);
         }
 
         // DELETE: api/Users/5
-        [Authorize(Roles ="Administrador")]
+        [Authorize(Roles = "Administrador")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {

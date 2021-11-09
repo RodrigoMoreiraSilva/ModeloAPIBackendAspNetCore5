@@ -1,4 +1,4 @@
-﻿using GestaoUnica_backend.Models;
+﻿using GestaoUnica_backend.Services.Models;
 using System.Collections.Generic;
 
 namespace GestaoUnica_backend.Business.Interfaces
@@ -8,9 +8,11 @@ namespace GestaoUnica_backend.Business.Interfaces
         User Create(User user);
         User FindByID(int id);
         User FindByUsername(string username);
+        User FindByToken(string token);
         List<User> FindAll();
         User Update(User user);
         void Delete(int id);
         bool Exists(int id);
+        bool ChangePassword(int id, string password);
     }
 }

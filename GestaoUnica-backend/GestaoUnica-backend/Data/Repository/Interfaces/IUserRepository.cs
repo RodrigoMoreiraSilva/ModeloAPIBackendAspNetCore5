@@ -1,9 +1,10 @@
-﻿using GestaoUnica_backend.Models;
+﻿using GestaoUnica_backend.Services.Models;
 
 namespace GestaoUnica_backend.Data.Repository.Interfaces
 {
     public interface IUserRepository
     {
         User FindByUsername(string username);
+        bool ChangePassword(int userId,string password);
     }
 }
